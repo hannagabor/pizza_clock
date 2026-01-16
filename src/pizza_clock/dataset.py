@@ -9,13 +9,10 @@ class AdditionDataset(Dataset):
     def __len__(self):
         return self.p * self.p
 
-    def __getitem__(self, idx: int):
+    def __getitem__(self, idx: int) -> tuple[t.Tensor, t.Tensor]:
         a = idx // self.p
         b = idx % self.p
         c = (a + b) % self.p
-        x = t.zeros((2, self.p))
-        x[0, a] = 1.0
-        x[1, b] = 1.0
-        y = t.zeros((self.p,))
-        y[c] = 1.0
+        x = t.Tensor([a, b])
+        y = t.Tensor([c])
         return x, y
