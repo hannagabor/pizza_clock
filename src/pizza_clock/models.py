@@ -6,7 +6,7 @@ from jaxtyping import Float
 import einops
 
 
-class ModelA(nn.Module):
+class Model(nn.Module):
     # one-layer RELU transformer with bidirectional attention regulated by the attention rate.
 
     # For a transformer with “width” d, the input embedding and the residue stream will be d-dimensional,
@@ -15,9 +15,7 @@ class ModelA(nn.Module):
     # applied. The post-softmax attention matrix is interpolated between an all-one matrix and original as
     # specified by the attention rate.
 
-    def __init__(
-        self, vocab_size: int, residual_dim: int = 128, attention_rate: float = 1.0
-    ):
+    def __init__(self, vocab_size: int, attention_rate: float, residual_dim: int = 128):
         super().__init__()
         self.device = t.device(
             "mps"
@@ -50,7 +48,7 @@ class ModelA(nn.Module):
         )
         self.fc1 = nn.Linear(residual_dim, self.num_mlp_hidden_units)
         self.fc2 = nn.Linear(self.num_mlp_hidden_units, residual_dim)
-        self.lm_head = nn.Linear(residual_dim, vocab_size)
+        self.unembedding = nn.Linear(residual_dim, vocab_size)
 
     def forward(
         self, x: Float[Tensor, "batch position token"]
