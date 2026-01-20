@@ -112,3 +112,34 @@ class TestModel:
 
         # Outputs should be identical
         assert t.allclose(output1, output2, atol=1e-6)
+
+    def test_attention_rate_affects_output(self):
+        t.manual_seed(4)
+        x = t.randint(0, 10, (2, 2))
+
+        config_rate_0 = Config(
+            p=10, attention_rate=0.0, residual_dim=128, use_wandb=False, seed=4
+        )
+        model_rate_0 = Model(config_rate_0)
+        output_rate_0 = model_rate_0.forward(x)
+
+        config_rate_1 = Config(
+            p=10, attention_rate=1.0, residual_dim=128, use_wandb=False, seed=4
+        )
+        model_rate_1 = Model(config_rate_1)
+        output_rate_1 = model_rate_1.forward(x)
+
+        assert not t.allclose(output_rate_0, output_rate_1, atol=1e-6)
+
+    def test_same_seed_produces_same_output(self):
+        t.manual_seed(4)
+        x = t.randint(0, 10, (2, 2))
+
+        config = Config(
+            p=10, attention_rate=0.0, residual_dim=128, use_wandb=False, seed=4
+        )
+        model_0 = Model(config)
+        output_0 = model_0.forward(x)
+        model_1 = Model(config)
+        output_1 = model_1.forward(x)
+        assert t.allclose(output_0, output_1, atol=1e-6)

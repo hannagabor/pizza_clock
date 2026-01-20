@@ -18,6 +18,8 @@ class Model(nn.Module):
     def __init__(self, config: Config):
         super().__init__()
         self.config = config
+        t.manual_seed(self.config.seed)
+
         self.token_embedding_table = t.nn.Embedding(
             config.p, config.residual_dim, device=self.config.device
         )
@@ -32,6 +34,7 @@ class Model(nn.Module):
         self.num_mlp_hidden_units = 4 * config.residual_dim
 
         self.attention = Attention(
+            config.attention_rate,
             n_heads=self.num_attention_heads,
             d_model=config.residual_dim,
             d_head=self.head_dim,
@@ -69,6 +72,7 @@ class Attention(nn.Module):
 
     def __init__(
         self,
+        attention_rate: float,
         n_heads: int,
         d_model: int,
         d_head: int,
@@ -76,6 +80,7 @@ class Attention(nn.Module):
         device: t.device,
     ):
         super().__init__()
+        self.attention_rate = attention_rate
         self.n_heads = n_heads
         self.d_model = d_model
         self.d_head = d_head
@@ -130,6 +135,8 @@ class Attention(nn.Module):
             "batch posn_Q nheads d_head, batch posn_K nheads d_head -> batch nheads posn_Q posn_K",
         ) / (self.d_head**0.5)
         attn_pattern = attn_scores.softmax(-1)
+
+        attn_pattern = (1 - self.attention_rate) + self.attention_rate * attn_pattern
 
         # Take weighted sum of value vectors, according to attention probabilities
         z = einops.einsum(
