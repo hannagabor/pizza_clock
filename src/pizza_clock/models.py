@@ -1,13 +1,11 @@
 import torch as t
-from pizza_clock.dataset import AdditionDataset
-from torch.utils.data import DataLoader, random_split
 from torch import Tensor, nn
 from jaxtyping import Float
 import einops
 
 
 class Model(nn.Module):
-    # one-layer RELU transformer with bidirectional attention regulated by the attention rate.
+    # One-layer RELU transformer with bidirectional attention regulated by the attention rate.
 
     # For a transformer with “width” d, the input embedding and the residue stream will be d-dimensional,
     # 4 attention heads of ⌊d/4⌋ dimensions will be employed, and the MLP will be of 4d hidden units.
@@ -55,7 +53,7 @@ class Model(nn.Module):
     ) -> Float[Tensor, "batch position vocab"]:
         token_embeddings = self.token_embedding_table(x)
         position_embeddings = self.position_embedding_table(
-            t.tensor([0, 1]), device=x.device
+            t.tensor([0, 1]).to(x.device)
         )
         x = token_embeddings + position_embeddings
 
