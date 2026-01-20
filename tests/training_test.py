@@ -21,9 +21,7 @@ def trainer(small_config):
 
 
 class TestModularAdditionModelTrainer:
-    def test_trainer_initialization(self, small_config):
-        trainer = ModularAdditionModelTrainer(small_config)
-
+    def test_trainer_initialization(self, small_config, trainer):
         assert trainer.model is not None
         assert trainer.optimizer is not None
         assert trainer.loss_fn is not None
