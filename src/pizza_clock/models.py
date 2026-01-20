@@ -1,6 +1,6 @@
 import torch as t
 from torch import Tensor, nn
-from jaxtyping import Float
+from jaxtyping import Float, Int
 import einops
 
 
@@ -11,7 +11,8 @@ class Model(nn.Module):
     # 4 attention heads of ⌊d/4⌋ dimensions will be employed, and the MLP will be of 4d hidden units.
     # By default d = 128 is chosen. ReLU is used as the activation function and layer normalization isn’t
     # applied. The post-softmax attention matrix is interpolated between an all-one matrix and original as
-    # specified by the attention rate.
+    # specified by the attention rate. TODO: this is a bit strange, maybe try dividing the all-one matrix
+    # by p.
 
     def __init__(self, vocab_size: int, attention_rate: float, residual_dim: int = 128):
         super().__init__()
@@ -49,7 +50,7 @@ class Model(nn.Module):
         self.unembedding = nn.Linear(residual_dim, vocab_size)
 
     def forward(
-        self, x: Float[Tensor, "batch position token"]
+        self, x: Int[Tensor, "batch position token"]
     ) -> Float[Tensor, "batch position vocab"]:
         token_embeddings = self.token_embedding_table(x)
         position_embeddings = self.position_embedding_table(

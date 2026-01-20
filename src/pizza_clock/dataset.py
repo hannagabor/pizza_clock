@@ -1,6 +1,8 @@
 from torch.utils.data import Dataset, DataLoader
 import torch as t
 from torch.utils.data import random_split
+from jaxtyping import Int
+from torch import Tensor
 
 
 class AdditionDataset(Dataset):
@@ -10,12 +12,12 @@ class AdditionDataset(Dataset):
     def __len__(self):
         return self.p * self.p
 
-    def __getitem__(self, idx: int) -> tuple[t.Tensor, t.Tensor]:
+    def __getitem__(self, idx: int) -> tuple[Int[Tensor, "2"], Int[Tensor, "1"]]:
         a = idx // self.p
         b = idx % self.p
         c = (a + b) % self.p
-        x = t.Tensor([a, b])
-        y = t.Tensor([c])
+        x = t.tensor([a, b], dtype=t.int32)
+        y = t.tensor([c], dtype=t.long)
         return x, y
 
 
