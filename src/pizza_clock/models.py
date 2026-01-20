@@ -2,6 +2,7 @@ import torch as t
 from torch import Tensor, nn
 from jaxtyping import Float, Int
 import einops
+from pizza_clock.config import Config
 
 
 class Model(nn.Module):
@@ -14,47 +15,41 @@ class Model(nn.Module):
     # specified by the attention rate. TODO: this is a bit strange, maybe try dividing the all-one matrix
     # by p.
 
-    def __init__(self, vocab_size: int, attention_rate: float, residual_dim: int = 128):
+    def __init__(self, config: Config):
         super().__init__()
-        self.device = t.device(
-            "mps"
-            if t.backends.mps.is_available()
-            else "cuda"
-            if t.cuda.is_available()
-            else "cpu"
-        )
-        self.token_embedding_table = t.nn.Embedding(vocab_size, residual_dim)
-        self.position_embedding_table = t.nn.Embedding(2, residual_dim)
+        self.config = config
+        self.token_embedding_table = t.nn.Embedding(config.p, config.residual_dim)
+        self.position_embedding_table = t.nn.Embedding(2, config.residual_dim)
 
         self.num_attention_heads = 4
-        self.head_dim = residual_dim // self.num_attention_heads
-        self.attention_rate = attention_rate
+        self.head_dim = config.residual_dim // self.num_attention_heads
+        self.attention_rate = config.attention_rate
 
-        self.num_mlp_hidden_units = 4 * residual_dim
+        self.num_mlp_hidden_units = 4 * config.residual_dim
 
         self.attention = Attention(
             n_heads=self.num_attention_heads,
-            d_model=residual_dim,
+            d_model=config.residual_dim,
             d_head=self.head_dim,
             init_range=0.02,
-            device=self.device,
+            device=self.config.device,
         )
 
         self.mlp = nn.Sequential(
-            nn.Linear(residual_dim, self.num_mlp_hidden_units),
+            nn.Linear(config.residual_dim, self.num_mlp_hidden_units),
             nn.ReLU(),
-            nn.Linear(self.num_mlp_hidden_units, residual_dim),
+            nn.Linear(self.num_mlp_hidden_units, config.residual_dim),
         )
-        self.fc1 = nn.Linear(residual_dim, self.num_mlp_hidden_units)
-        self.fc2 = nn.Linear(self.num_mlp_hidden_units, residual_dim)
-        self.unembedding = nn.Linear(residual_dim, vocab_size)
+        self.fc1 = nn.Linear(config.residual_dim, self.num_mlp_hidden_units)
+        self.fc2 = nn.Linear(self.num_mlp_hidden_units, config.residual_dim)
+        self.unembedding = nn.Linear(config.residual_dim, config.p)
 
     def forward(
         self, x: Int[Tensor, "batch position token"]
     ) -> Float[Tensor, "batch position vocab"]:
         token_embeddings = self.token_embedding_table(x)
         position_embeddings = self.position_embedding_table(
-            t.tensor([0, 1]).to(x.device)
+            t.tensor([0, 1]).to(self.config.device)
         )
         x = token_embeddings + position_embeddings
 

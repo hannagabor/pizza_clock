@@ -1,23 +1,31 @@
 import torch as t
 from torch import nn, Tensor
-from torch.utils.data import DataLoader
 from pizza_clock.models import Model
 from pizza_clock.dataset import get_train_val_data
-from jaxtyping import Float, Int
+from jaxtyping import Float
 from tqdm import tqdm
+import wandb
+from pizza_clock.config import Config
+
+
+def get_device() -> str:
+    if t.backends.mps.is_available():
+        return "mps"
+    elif t.cuda.is_available():
+        return "cuda"
+    else:
+        return "cpu"
 
 
 class ModularAdditionModelTrainer:
     def __init__(
         self,
-        p,
-        lr=1e-3,
-        weight_decay=1e-2,
+        config: Config,
     ):
-        self.train_loader, self.val_loader = get_train_val_data(p)
-        self.model = Model(vocab_size=p, attention_rate=0.0)
+        self.train_loader, self.val_loader = get_train_val_data(config.p)
+        self.model = Model(vocab_size=config.p, attention_rate=config.attention_rate)
         self.optimizer = t.optim.AdamW(
-            self.model.parameters(), lr=lr, weight_decay=weight_decay
+            self.model.parameters(), lr=config.lr, weight_decay=config.weight_decay
         )
         self.loss_fn = nn.CrossEntropyLoss()
 
@@ -34,6 +42,8 @@ class ModularAdditionModelTrainer:
         return loss.item()
 
     def train(self, epochs: int = 20000, log_every_n_steps: int = 100):
+        wandb.init(project=self.args.wandb_project, name=self.args.wandb_name)
+        wandb.watch(self.model)
         pbar = tqdm(range(epochs))
         for epoch in pbar:
             for x, y in self.train_loader:
