@@ -11,4 +11,8 @@ config = Config(
 )
 
 trainer = ModularAdditionModelTrainer(config)
-trainer.train(epochs=2000)
+model = trainer.train(epochs=20)
+t.save(model, "test_model.pt")
+new_model = t.load("test_model.pt", weights_only=False)
+for name, param in new_model.named_parameters():
+    print(name)
