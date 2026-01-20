@@ -1,10 +1,9 @@
-from xml.parsers.expat import model
 import torch as t
 from torch import nn, Tensor
 from torch.utils.data import DataLoader
 from pizza_clock.models import Model
 from pizza_clock.dataset import get_train_val_data
-from jaxtyping import Float
+from jaxtyping import Float, Int
 from tqdm import tqdm
 
 
@@ -25,7 +24,8 @@ class ModularAdditionModelTrainer:
     def training_step(
         self, x: Float[Tensor, "batch seq_len"], y: Float[Tensor, "batch 1"]
     ) -> float:
-        self.model.zero_grad()
+        self.model.train()
+        self.optimizer.zero_grad()
         out = self.model(x)
         logits = out[:, -1, :]
         loss = self.loss_fn(logits, y.squeeze())
@@ -39,7 +39,18 @@ class ModularAdditionModelTrainer:
             for x, y in self.train_loader:
                 train_loss = self.training_step(x, y)
                 if epoch % log_every_n_steps == 0:
-                    print(train_loss)
+                    val_loss, val_accuracy = self.evaluate()
                 pbar.set_postfix(
-                    epoch=f"{epoch + 1}/{epochs}", loss=f"{train_loss:.3f}"
+                    epoch=f"{epoch + 1}/{epochs}",
+                    loss=f"{train_loss:.3f}, val_loss={val_loss:.3f}, val_acc={val_accuracy:.3f}",
                 )
+
+    def evaluate(self) -> tuple[float, float]:
+        self.model.eval()
+        with t.no_grad():
+            for x, y in self.val_loader:
+                out = self.model(x)
+                logits = out[:, -1, :]
+                loss = self.loss_fn(logits, y.squeeze())
+                accuracy = (logits.argmax(dim=-1) == y.squeeze()).float().mean().item()
+        return loss, accuracy
