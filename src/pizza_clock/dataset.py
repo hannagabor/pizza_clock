@@ -3,6 +3,7 @@ import torch as t
 from torch.utils.data import random_split
 from jaxtyping import Int
 from torch import Tensor
+from pizza_clock.config import Config
 
 
 class AdditionDataset(Dataset):
@@ -21,9 +22,9 @@ class AdditionDataset(Dataset):
         return x, y
 
 
-def get_train_val_data(p: int):
-    dataset = AdditionDataset(p)
-    generator = t.Generator().manual_seed(42)
+def get_train_val_data(config: Config) -> tuple[DataLoader, DataLoader]:
+    dataset = AdditionDataset(config.p)
+    generator = t.Generator().manual_seed(config.seed)
     train_dataset, val_dataset = random_split(dataset, [0.8, 0.2], generator=generator)
     train_dataloader = DataLoader(
         train_dataset, batch_size=len(train_dataset), shuffle=True

@@ -18,8 +18,12 @@ class Model(nn.Module):
     def __init__(self, config: Config):
         super().__init__()
         self.config = config
-        self.token_embedding_table = t.nn.Embedding(config.p, config.residual_dim)
-        self.position_embedding_table = t.nn.Embedding(2, config.residual_dim)
+        self.token_embedding_table = t.nn.Embedding(
+            config.p, config.residual_dim, device=self.config.device
+        )
+        self.position_embedding_table = t.nn.Embedding(
+            2, config.residual_dim, device=self.config.device
+        )
 
         self.num_attention_heads = 4
         self.head_dim = config.residual_dim // self.num_attention_heads

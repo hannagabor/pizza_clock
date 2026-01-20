@@ -10,8 +10,10 @@ class Config:
     lr: float = 1e-3
     weight_decay: float = 1e-2
     wandb_project_name: str = "modular-addition"
+    wandb_name: str | None = None
     use_wandb: bool = True
     device: str = "cpu"
+    seed: int | None = 42
 
 
 def get_device() -> str:
