@@ -1,5 +1,6 @@
 import pytest
 from pizza_clock.dataset import AdditionDataset, get_train_val_data
+from pizza_clock.config import Config
 
 
 @pytest.mark.parametrize("p", [5, 7, 11])
@@ -24,11 +25,11 @@ def test_addition_dataset(p):
 
 
 def test_train_val_split():
-    p = 5
+    config = Config(p=5, use_wandb=False)
     train_length = 20
     val_length = 5
 
-    train_dataloader, val_dataloader = get_train_val_data(p)
+    train_dataloader, val_dataloader = get_train_val_data(config)
 
     assert len(train_dataloader.dataset) == train_length
     assert len(val_dataloader.dataset) == val_length

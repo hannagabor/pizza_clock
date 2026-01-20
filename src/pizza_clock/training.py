@@ -77,4 +77,4 @@ class ModularAdditionModelTrainer:
                         {"val loss": loss.item(), "val accuracy": accuracy},
                         step=self.step,
                     )
-        return loss, accuracy
+        return loss.item(), accuracy
