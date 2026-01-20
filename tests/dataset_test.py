@@ -1,5 +1,5 @@
 import pytest
-from pizza_clock.dataset import AdditionDataset, get_train_val_datasets
+from pizza_clock.dataset import AdditionDataset, get_train_val_data
 
 
 @pytest.mark.parametrize("p", [5, 7, 11])
@@ -28,10 +28,10 @@ def test_train_val_split():
     train_length = 20
     val_length = 5
 
-    train_dataset, val_dataset = get_train_val_datasets(p)
+    train_dataloader, val_dataloader = get_train_val_data(p)
 
-    assert len(train_dataset) == train_length
-    assert len(val_dataset) == val_length
+    assert len(train_dataloader.dataset) == train_length
+    assert len(val_dataloader.dataset) == val_length
 
 
 if __name__ == "__main__":
