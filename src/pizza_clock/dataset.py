@@ -1,5 +1,6 @@
 from torch.utils.data import Dataset
 import torch as t
+from torch.utils.data import random_split
 
 
 class AdditionDataset(Dataset):
@@ -16,3 +17,9 @@ class AdditionDataset(Dataset):
         x = t.Tensor([a, b])
         y = t.Tensor([c])
         return x, y
+
+
+def get_train_val_datasets(p: int):
+    dataset = AdditionDataset(p)
+    generator = t.Generator().manual_seed(42)
+    return random_split(dataset, [0.8, 0.2], generator=generator)
