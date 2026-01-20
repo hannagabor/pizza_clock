@@ -8,15 +8,6 @@ import wandb
 from pizza_clock.config import Config
 
 
-def get_device() -> str:
-    if t.backends.mps.is_available():
-        return "mps"
-    elif t.cuda.is_available():
-        return "cuda"
-    else:
-        return "cpu"
-
-
 class ModularAdditionModelTrainer:
     def __init__(
         self,
