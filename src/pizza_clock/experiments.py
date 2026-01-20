@@ -1,5 +1,6 @@
 from pizza_clock.training import ModularAdditionModelTrainer
 from pizza_clock.config import Config, get_device
+import torch as t
 
 config = Config(
     p=59,

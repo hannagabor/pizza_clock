@@ -2,6 +2,9 @@ import pytest
 import torch as t
 from pizza_clock.training import ModularAdditionModelTrainer
 from pizza_clock.config import Config
+import tempfile
+import os
+from pizza_clock.models import Model
 
 
 @pytest.fixture
@@ -117,6 +120,37 @@ class TestModularAdditionModelTrainer:
 
         assert abs(val_loss_1 - val_loss_2) < 1e-6
         assert abs(val_acc_1 - val_acc_2) < 1e-6
+
+    def test_model_save_and_load(self, trainer):
+        for _ in range(5):
+            for x, y in trainer.train_loader:
+                trainer.training_step(x, y)
+                break
+        for x, y in trainer.val_loader:
+            break
+
+        trainer.model.eval()
+        with t.no_grad():
+            initial_output = trainer.model(x)
+        with tempfile.NamedTemporaryFile(suffix=".pt", delete=False) as tmp_file:
+            temp_path = tmp_file.name
+
+        try:
+            t.save(trainer.model, temp_path)
+            new_model = t.load(temp_path, weights_only=False)
+        finally:
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+
+        new_model.eval()
+        with t.no_grad():
+            loaded_output = new_model(x)
+        assert t.allclose(initial_output, loaded_output, atol=1e-6), (
+            "Loaded model should produce identical output to original model"
+        )
+
+        assert loaded_output.shape == initial_output.shape
+        assert loaded_output.shape == (x.shape[0], 2, trainer.config.p)
 
 
 if __name__ == "__main__":
