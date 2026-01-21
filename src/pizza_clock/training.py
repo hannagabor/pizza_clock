@@ -16,7 +16,13 @@ class ModularAdditionModelTrainer:
         self.train_loader, self.val_loader = get_train_val_data(config)
         self.model = Model(config).to(config.device)
         self.optimizer = t.optim.AdamW(
-            self.model.parameters(), lr=config.lr, weight_decay=config.weight_decay
+            self.model.parameters(),
+            lr=config.lr,
+            weight_decay=config.weight_decay,
+            betas=(0.9, 0.98),
+        )
+        self.scheduler = t.optim.lr_scheduler.LambdaLR(
+            self.optimizer, lambda step: min(step / 10, 1)
         )
         self.loss_fn = nn.CrossEntropyLoss()
         self.step = 0
@@ -34,6 +40,7 @@ class ModularAdditionModelTrainer:
         loss = self.loss_fn(logits, y.squeeze())
         loss.backward()
         self.optimizer.step()
+        self.scheduler.step()
         if self.config.use_wandb:
             wandb.log({"train loss": loss.item()}, step=self.step)
         return loss.item()
