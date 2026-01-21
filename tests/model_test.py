@@ -1,7 +1,8 @@
-from pizza_clock.models import Model
+from pizza_clock.models import Model, Embedding
 import pytest
 import torch as t
 from pizza_clock.config import Config
+from torch import tensor
 
 
 class TestModel:
@@ -144,3 +145,39 @@ class TestModel:
         model_1 = Model(config)
         output_1 = model_1.forward(x)
         assert t.allclose(output_0, output_1, atol=1e-6)
+
+
+class TestEmbedding:
+    def test_embedding_batch_indexing(self):
+        vocab_size = 3
+        embedding_dim = 4
+        batch_size = 5
+        device = t.device("cpu")
+
+        t.manual_seed(42)
+        embedding = Embedding(vocab_size, embedding_dim, device)
+        print(embedding.weight)
+        expected_weight = tensor(
+            [
+                [0.1683, 0.0644, 0.1172, 0.1152],
+                [-0.5614, -0.0932, 1.1041, -0.3190],
+                [0.2308, 0.1337, 0.2675, 0.4047],
+            ]
+        )
+        assert t.allclose(expected_weight, embedding.weight, atol=1e-4)
+
+        x = t.tensor(
+            [[0, 1], [0, 2], [0, 1], [1, 2], [2, 2]]
+        )  # batch x sequence, containing indices
+        assert x.shape == (batch_size, 2)
+        output = embedding(x)
+
+        assert output.shape == (batch_size, 2, embedding_dim)
+        assert t.allclose(output[0, 0], expected_weight[0], atol=1e-4)
+        assert t.allclose(output[0, 1], expected_weight[1], atol=1e-4)
+        assert t.allclose(output[1, 0], expected_weight[0], atol=1e-4)
+        assert t.allclose(output[1, 1], expected_weight[2], atol=1e-4)
+
+
+if __name__ == "__main__":
+    TestEmbedding().test_embedding_batch_indexing()

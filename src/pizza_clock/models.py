@@ -74,12 +74,12 @@ class Model(nn.Module):
 class Embedding(nn.Module):
     def __init__(self, vocab_size: int, embedding_dim: int, device: t.device):
         super().__init__()
-        self.weight = t.randn(vocab_size, embedding_dim, device=device) / (
-            embedding_dim**0.5
+        self.weight = nn.Parameter(
+            t.randn(vocab_size, embedding_dim, device=device) / (embedding_dim**0.5)
         )
 
     def forward(
-        self, x: Int[Tensor, "batch position token"]
+        self, x: Int[Tensor, "batch position"]
     ) -> Float[Tensor, "batch position embedding_dim"]:
         return self.weight[x]
 
@@ -87,8 +87,8 @@ class Embedding(nn.Module):
 class Unembedding(nn.Module):
     def __init__(self, vocab_size: int, embedding_dim: int, device: t.device):
         super().__init__()
-        self.weight = t.randn(vocab_size, embedding_dim, device=device) / (
-            embedding_dim**0.5
+        self.weight = nn.Parameter(
+            t.randn(vocab_size, embedding_dim, device=device) / (embedding_dim**0.5)
         )
 
     def forward(
