@@ -6,24 +6,25 @@ from multiprocessing import Pool
 
 def train_model(i: int, attention_rate: float):
     config = Config(
-        p=59,
+        p=113,
         attention_rate=attention_rate,
         residual_dim=128,
         device=get_device(),
         use_wandb=True,
         seed=i,
         wandb_name=f"test_model_{i}_attention_{attention_rate}",
-        wandb_project_name="modular-addition-attention-scale_embedding-fix",
+        wandb_project_name="modular-addition-attention-test",
+        weight_decay=1.0,
     )
 
     trainer = ModularAdditionModelTrainer(config)
-    model = trainer.train(epochs=20000, log_every_n_steps=50)
+    model = trainer.train(epochs=2000, log_every_n_steps=10)
     t.save(model, f"saved_models/test_model_{i}_attention_{config.attention_rate}.pt")
 
 
 if __name__ == "__main__":
     args = []
-    for i in range(10):
+    for i in range(5):
         for attention_rate in [0.0, 1.0]:
             args.append((i, attention_rate))
 

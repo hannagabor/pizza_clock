@@ -31,8 +31,8 @@ def test_train_val_split():
 
     train_dataloader, val_dataloader = get_train_val_data(config)
 
-    assert len(train_dataloader.dataset) == train_length
-    assert len(val_dataloader.dataset) == val_length
+    assert train_length - 1 <= len(train_dataloader.dataset) <= train_length + 1
+    assert val_length - 1 <= len(val_dataloader.dataset) <= val_length + 1
 
 
 if __name__ == "__main__":

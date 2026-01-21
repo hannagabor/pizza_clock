@@ -26,6 +26,6 @@ Disclaimer: This project is WIP, I am currently just in the process of reimpleme
     * I think it is important that the weight decay is $2$, not $1e-2$...
     * I didn't have a scheduler that ramps up the learning rate to the given value gradually, during the first 10 steps. Not sure if this is important.
     * I had other bugs, like sometimes forgetting to use `nn.Parameter`.
-* Now I have validation accuracy $1$. I don't see that long part where the train loss is 0, but the val loss is not.
+* Now I have validation accuracy $1$! There is a small delay in the validation loss dropping to $0$ after the training loss has dropped to $0$.This is grokking, but not as pronounced as in the Nanda paper.
 ![alt text](screenshots/train_loss_after_fixes.png)
 ![alt text](screenshots/val_loss_after_fixes.png)
