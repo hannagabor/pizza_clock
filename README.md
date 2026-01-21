@@ -9,9 +9,10 @@ Disclaimer: This project is WIP, I am currently just in the process of reimpleme
 
 ## Plan
 
-1. Reimplement some experiments from [The Clock and the Pizza: Two Stories in Mechanistic Explanation of Neural Networks](https://arxiv.org/abs/2306.17844).
-2. Track LLC during training. Can we differentiate Pizza and Clock solutions based on the LLC?
-3. Investigate other scenarios.
+1. Reimplement some experiments from [The Clock and the Pizza: Two Stories in Mechanistic Explanation of Neural Networks](https://arxiv.org/abs/2306.17844). (They shared the code, but as mentioned earlier, I would like to write something from scratch.)
+2. Make sure we can searate pizza and clock solutions.
+3. Track LLC during training. Can we differentiate Pizza and Clock solutions based on the LLC?
+4. Investigate other scenarios. (Expand plan.)
 
 
 ## Journal
@@ -31,3 +32,4 @@ Disclaimer: This project is WIP, I am currently just in the process of reimpleme
 ![alt text](screenshots/val_loss_after_fixes.png)
 * Hm, Nanda et al took $30$% of the data, not $80$, so grokking was more difficult than here with $80$. I didn't run these ecperiments for long, but I could see the grokking for some of the trajectories and the validation accuracy not dropping for others. 
 ![alt text](screenshots/p113,training_ratio0.3.png)
+* From an LLC research point of view, it would be best to find parameters where grokking is clearly separated from memorization, but it doesn't take too long to grok.
