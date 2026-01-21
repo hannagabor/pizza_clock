@@ -12,7 +12,7 @@ for attention_rate in [0.0, 1.0]:
             use_wandb=True,
             seed=i,
             wandb_name=f"test_model_{i}_attention_{attention_rate}",
-            wandb_project_name="modular-addition-attention-scale_embedding",
+            wandb_project_name="modular-addition-attention-scale_embedding-fix",
         )
 
         trainer = ModularAdditionModelTrainer(config)

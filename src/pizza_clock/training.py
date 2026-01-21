@@ -51,10 +51,9 @@ class ModularAdditionModelTrainer:
                 train_loss = self.training_step(x, y)
                 if epoch % log_every_n_steps == 0:
                     val_loss, val_accuracy = self.evaluate()
-                pbar.set_postfix(
-                    epoch=f"{epoch + 1}/{epochs}",
-                    loss=f"{train_loss:.3f}, val_loss={val_loss:.3f}, val_acc={val_accuracy:.3f}",
-                )
+                    pbar.set_postfix(
+                        loss=f"{train_loss:.3f}, val_loss={val_loss:.3f}, val_acc={val_accuracy:.3f}",
+                    )
                 self.step += 1
 
         if self.config.use_wandb:

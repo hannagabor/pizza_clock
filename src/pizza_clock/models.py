@@ -47,8 +47,6 @@ class Model(nn.Module):
             nn.ReLU(),
             nn.Linear(self.num_mlp_hidden_units, config.residual_dim),
         )
-        self.fc1 = nn.Linear(config.residual_dim, self.num_mlp_hidden_units)
-        self.fc2 = nn.Linear(self.num_mlp_hidden_units, config.residual_dim)
         self.unembedding = Unembedding(
             vocab_size=config.p,
             embedding_dim=config.residual_dim,
@@ -64,9 +62,8 @@ class Model(nn.Module):
         )
         x = token_embeddings + position_embeddings
 
-        x = self.attention(x)
-        x = t.nn.functional.relu(self.fc1(x))
-        x = self.fc2(x)
+        x = x + self.attention(x)
+        x = x + self.mlp(x)
         logits = self.unembedding(x)
         return logits
 
@@ -124,10 +121,6 @@ class Attention(nn.Module):
         self.W_K = nn.Parameter(t.empty((n_heads, d_model, d_head)))
         self.W_V = nn.Parameter(t.empty((n_heads, d_model, d_head)))
         self.W_O = nn.Parameter(t.empty((n_heads, d_head, d_model)))
-        self.b_Q = nn.Parameter(t.zeros((n_heads, d_head)))
-        self.b_K = nn.Parameter(t.zeros((n_heads, d_head)))
-        self.b_V = nn.Parameter(t.zeros((n_heads, d_head)))
-        self.b_O = nn.Parameter(t.zeros((d_model)))
         nn.init.normal_(self.W_Q, std=self.init_range)
         nn.init.normal_(self.W_K, std=self.init_range)
         nn.init.normal_(self.W_V, std=self.init_range)
@@ -137,29 +130,20 @@ class Attention(nn.Module):
         self, normalized_resid_pre: Float[Tensor, "batch posn d_model"]
     ) -> Float[Tensor, "batch posn d_model"]:
         # Calculate query, key and value vectors
-        q = (
-            einops.einsum(
-                normalized_resid_pre,
-                self.W_Q,
-                "batch posn d_model, nheads d_model d_head -> batch posn nheads d_head",
-            )
-            + self.b_Q
+        q = einops.einsum(
+            normalized_resid_pre,
+            self.W_Q,
+            "batch posn d_model, nheads d_model d_head -> batch posn nheads d_head",
         )
-        k = (
-            einops.einsum(
-                normalized_resid_pre,
-                self.W_K,
-                "batch posn d_model, nheads d_model d_head -> batch posn nheads d_head",
-            )
-            + self.b_K
+        k = einops.einsum(
+            normalized_resid_pre,
+            self.W_K,
+            "batch posn d_model, nheads d_model d_head -> batch posn nheads d_head",
         )
-        v = (
-            einops.einsum(
-                normalized_resid_pre,
-                self.W_V,
-                "batch posn d_model, nheads d_model d_head -> batch posn nheads d_head",
-            )
-            + self.b_V
+        v = einops.einsum(
+            normalized_resid_pre,
+            self.W_V,
+            "batch posn d_model, nheads d_model d_head -> batch posn nheads d_head",
         )
 
         # Calculate attention scores, then scale and apply softmax to get probabilities
@@ -180,13 +164,10 @@ class Attention(nn.Module):
         )
 
         # Calculate output (by applying matrix W_O and summing over heads, then adding bias b_O)
-        attn_out = (
-            einops.einsum(
-                z,
-                self.W_O,
-                "batch posn_Q nheads d_head, nheads d_head d_model -> batch posn_Q d_model",
-            )
-            + self.b_O
+        attn_out = einops.einsum(
+            z,
+            self.W_O,
+            "batch posn_Q nheads d_head, nheads d_head d_model -> batch posn_Q d_model",
         )
 
         return attn_out
