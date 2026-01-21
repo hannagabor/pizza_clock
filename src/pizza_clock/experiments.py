@@ -13,8 +13,9 @@ def train_model(i: int, attention_rate: float):
         use_wandb=True,
         seed=i,
         wandb_name=f"test_model_{i}_attention_{attention_rate}",
-        wandb_project_name="modular-addition-attention-test",
+        wandb_project_name="modular-addition-attention-113-0.3",
         weight_decay=1.0,
+        train_fraction=0.3,
     )
 
     trainer = ModularAdditionModelTrainer(config)

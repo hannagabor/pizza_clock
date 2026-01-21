@@ -29,3 +29,5 @@ Disclaimer: This project is WIP, I am currently just in the process of reimpleme
 * Now I have validation accuracy $1$! There is a small delay in the validation loss dropping to $0$ after the training loss has dropped to $0$.This is grokking, but not as pronounced as in the Nanda paper.
 ![alt text](screenshots/train_loss_after_fixes.png)
 ![alt text](screenshots/val_loss_after_fixes.png)
+* Hm, Nanda et al took $30$% of the data, not $80$, so grokking was more difficult than here with $80$. I didn't run these ecperiments for long, but I could see the grokking for some of the trajectories and the validation accuracy not dropping for others. 
+![alt text](screenshots/p113,training_ratio0.3.png)
