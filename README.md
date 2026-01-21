@@ -16,7 +16,7 @@ Disclaimer: This project is WIP, I am currently just in the process of reimpleme
 
 ## Journal
 * Reimplemented the models from the paper, they kind of work. There is a sudden drop in validation loss after 15000 steps, but the models do not reach 100% validation accuracy. Why?
-![alt text](image.png)
-![alt text](image-1.png)
+![alt text](screenshots/image.png)
+![alt text](screenshots/image-1.png)
 
 
