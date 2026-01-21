@@ -85,7 +85,7 @@ class Unembedding(nn.Module):
     def __init__(self, vocab_size: int, embedding_dim: int, device: t.device):
         super().__init__()
         self.weight = nn.Parameter(
-            t.randn(vocab_size, embedding_dim, device=device) / (embedding_dim**0.5)
+            t.randn(vocab_size, embedding_dim, device=device) / (vocab_size**0.5)
         )
 
     def forward(
@@ -121,10 +121,11 @@ class Attention(nn.Module):
         self.W_K = nn.Parameter(t.empty((n_heads, d_model, d_head)))
         self.W_V = nn.Parameter(t.empty((n_heads, d_model, d_head)))
         self.W_O = nn.Parameter(t.empty((n_heads, d_head, d_model)))
-        nn.init.normal_(self.W_Q, std=self.init_range)
-        nn.init.normal_(self.W_K, std=self.init_range)
-        nn.init.normal_(self.W_V, std=self.init_range)
-        nn.init.normal_(self.W_O, std=self.init_range)
+        std = 1 / (d_model**0.5)
+        nn.init.normal_(self.W_Q, std=std)
+        nn.init.normal_(self.W_K, std=std)
+        nn.init.normal_(self.W_V, std=std)
+        nn.init.normal_(self.W_O, std=std)
 
     def forward(
         self, normalized_resid_pre: Float[Tensor, "batch posn d_model"]
