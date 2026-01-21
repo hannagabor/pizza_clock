@@ -4,10 +4,9 @@ import torch as t
 from multiprocessing import Pool
 
 
-def train_model(i: int, attention_rate: float):
-    p = 113
-    train_fraction = 0.3
-    weight_decay = 1.0
+def train_model(
+    i: int, attention_rate: float, p: int, train_fraction: float, weight_decay: float
+):
     config = Config(
         p=p,
         attention_rate=attention_rate,
@@ -22,7 +21,7 @@ def train_model(i: int, attention_rate: float):
     )
 
     trainer = ModularAdditionModelTrainer(config)
-    model = trainer.train(epochs=2000, log_every_n_steps=10)
+    model = trainer.train(epochs=6000, log_every_n_steps=10)
 
     t.save(
         model,
@@ -34,7 +33,12 @@ if __name__ == "__main__":
     args = []
     for i in range(5):
         for attention_rate in [0.0, 1.0]:
-            args.append((i, attention_rate))
+            for p in [113, 59]:
+                for train_fraction in [0.3, 0.5, 0.8]:
+                    for weight_decay in [1.0, 1.5, 2.0]:
+                        args.append(
+                            (i, attention_rate, p, train_fraction, weight_decay)
+                        )
 
     with Pool(5) as p:
         p.starmap(train_model, args)

@@ -50,6 +50,7 @@ class ModularAdditionModelTrainer:
             wandb.init(
                 project=self.config.wandb_project_name, name=self.config.wandb_name
             )
+            self.wandb_run_id = wandb.run.id
             wandb.watch(self.model)
 
         pbar = tqdm(range(epochs))
