@@ -20,10 +20,10 @@ class Model(nn.Module):
         self.config = config
         t.manual_seed(self.config.seed)
 
-        self.token_embedding_table = t.nn.Embedding(
+        self.token_embedding = EmbeddingLayer(
             config.p, config.residual_dim, device=self.config.device
         )
-        self.position_embedding_table = t.nn.Embedding(
+        self.position_embedding = EmbeddingLayer(
             2, config.residual_dim, device=self.config.device
         )
 
@@ -54,8 +54,8 @@ class Model(nn.Module):
     def forward(
         self, x: Int[Tensor, "batch position token"]
     ) -> Float[Tensor, "batch position vocab"]:
-        token_embeddings = self.token_embedding_table(x)
-        position_embeddings = self.position_embedding_table(
+        token_embeddings = self.token_embedding(x)
+        position_embeddings = self.position_embedding(
             t.tensor([0, 1]).to(self.config.device)
         )
         x = token_embeddings + position_embeddings
@@ -65,6 +65,19 @@ class Model(nn.Module):
         x = self.fc2(x)
         logits = self.unembedding(x)
         return logits
+
+
+class EmbeddingLayer(nn.Module):
+    def __init__(self, vocab_size: int, embedding_dim: int, device: t.device):
+        super().__init__()
+        self.weight = t.randn(vocab_size, embedding_dim, device=device) / (
+            embedding_dim**0.5
+        )
+
+    def forward(
+        self, x: Int[Tensor, "batch position token"]
+    ) -> Float[Tensor, "batch position embedding_dim"]:
+        return self.weight[x]
 
 
 class Attention(nn.Module):

@@ -31,8 +31,6 @@ class TestModularAdditionModelTrainer:
         assert trainer.train_loader is not None
         assert trainer.val_loader is not None
         assert trainer.config == small_config
-
-        assert trainer.model.token_embedding_table.num_embeddings == small_config.p
         assert trainer.model.attention_rate == small_config.attention_rate
 
     def test_training_step(self, trainer):

@@ -16,10 +16,11 @@ class TestModel:
 
         model = Model(config)
 
-        assert model.token_embedding_table.num_embeddings == config.p
-        assert model.token_embedding_table.embedding_dim == config.residual_dim
-        assert model.position_embedding_table.num_embeddings == 2
-        assert model.position_embedding_table.embedding_dim == config.residual_dim
+        assert model.token_embedding.weight.shape == (
+            config.p,
+            config.residual_dim,
+        )
+        assert model.position_embedding.weight.shape == (2, config.residual_dim)
         assert model.attention_rate == config.attention_rate
         assert model.num_attention_heads == 4
         assert model.head_dim == config.residual_dim // 4

@@ -19,4 +19,5 @@ Disclaimer: This project is WIP, I am currently just in the process of reimpleme
 ![alt text](screenshots/image.png)
 ![alt text](screenshots/image-1.png)
 
-
+* What differences are there between my implementation and theirs?
+    *  I used `nn.Embedding`, which initializes the weight matrix from $\mathcal{N}(0,1)$, while tha paper used `torch.randn(d_model, d_vocab)/np.sqrt(d_model)` for weight init. The difference is the scaling by the square root of `d_model`.
