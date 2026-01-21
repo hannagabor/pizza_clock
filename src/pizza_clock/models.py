@@ -20,10 +20,10 @@ class Model(nn.Module):
         self.config = config
         t.manual_seed(self.config.seed)
 
-        self.token_embedding = EmbeddingLayer(
+        self.token_embedding = Embedding(
             config.p, config.residual_dim, device=self.config.device
         )
-        self.position_embedding = EmbeddingLayer(
+        self.position_embedding = Embedding(
             2, config.residual_dim, device=self.config.device
         )
 
@@ -49,7 +49,11 @@ class Model(nn.Module):
         )
         self.fc1 = nn.Linear(config.residual_dim, self.num_mlp_hidden_units)
         self.fc2 = nn.Linear(self.num_mlp_hidden_units, config.residual_dim)
-        self.unembedding = nn.Linear(config.residual_dim, config.p)
+        self.unembedding = Unembedding(
+            vocab_size=config.p,
+            embedding_dim=config.residual_dim,
+            device=self.config.device,
+        )
 
     def forward(
         self, x: Int[Tensor, "batch position token"]
@@ -67,7 +71,7 @@ class Model(nn.Module):
         return logits
 
 
-class EmbeddingLayer(nn.Module):
+class Embedding(nn.Module):
     def __init__(self, vocab_size: int, embedding_dim: int, device: t.device):
         super().__init__()
         self.weight = t.randn(vocab_size, embedding_dim, device=device) / (
@@ -78,6 +82,23 @@ class EmbeddingLayer(nn.Module):
         self, x: Int[Tensor, "batch position token"]
     ) -> Float[Tensor, "batch position embedding_dim"]:
         return self.weight[x]
+
+
+class Unembedding(nn.Module):
+    def __init__(self, vocab_size: int, embedding_dim: int, device: t.device):
+        super().__init__()
+        self.weight = t.randn(vocab_size, embedding_dim, device=device) / (
+            embedding_dim**0.5
+        )
+
+    def forward(
+        self, x: Float[Tensor, "batch position embedding_dim"]
+    ) -> Float[Tensor, "batch position vocab_size"]:
+        return einops.einsum(
+            self.weight,
+            x,
+            "vocab_size embedding_dim, batch position embedding_dim -> batch position vocab_size",
+        )
 
 
 class Attention(nn.Module):
