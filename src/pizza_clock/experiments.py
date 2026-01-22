@@ -7,6 +7,7 @@ from multiprocessing import Pool
 def train_model(
     i: int, attention_rate: float, p: int, train_fraction: float, weight_decay: float
 ):
+    name = f"p{p}_attn{attention_rate}_td{train_fraction}_wd{weight_decay}_seed{i}"
     config = Config(
         p=p,
         attention_rate=attention_rate,
@@ -14,8 +15,8 @@ def train_model(
         device=get_device(),
         use_wandb=True,
         seed=i,
-        wandb_name=f"test_model_{i}_attention_{attention_rate}",
-        wandb_project_name="modular-addition-attention-113-0.3",
+        wandb_name=name,
+        wandb_project_name="modular-addition-attention-grokking-sweep",
         weight_decay=weight_decay,
         train_fraction=train_fraction,
     )
@@ -25,7 +26,7 @@ def train_model(
 
     t.save(
         model,
-        f"saved_models/p{p}_attn{attention_rate}_td{train_fraction}_wd{weight_decay}_seed{i}.pt",
+        f"saved_models/{name}.pt",
     )
 
 
