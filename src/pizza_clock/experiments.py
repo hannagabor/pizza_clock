@@ -16,13 +16,13 @@ def train_model(
         use_wandb=True,
         seed=i,
         wandb_name=name,
-        wandb_project_name="grokking-with-attention-rate",
+        wandb_project_name="modular-addition-2",
         weight_decay=weight_decay,
         train_fraction=train_fraction,
     )
 
     trainer = ModularAdditionModelTrainer(config)
-    model = trainer.train(epochs=1000, log_every_n_steps=10)
+    model = trainer.train(epochs=20000, log_every_n_steps=10)
 
     t.save(
         model,
@@ -46,13 +46,13 @@ if __name__ == "__main__":
     p = 59
     train_fraction = 0.8
     weight_decay = 2.0
-    # args = []
-    # for i in range(5):
-    #     for attention_rate in [0.0, 1.0]:
-    #         args.append((i, attention_rate, p, train_fraction, weight_decay))
-    # with Pool(5) as p:
-    #     p.starmap(train_model, args)
-    train_model(0, 1.0, p, train_fraction, weight_decay)
+    args = []
+    for i in range(5):
+        for attention_rate in [0.0, 1.0]:
+            args.append((i, attention_rate, p, train_fraction, weight_decay))
+    with Pool(5) as p:
+        p.starmap(train_model, args)
+    # train_model(0, 0.0, p, train_fraction, weight_decay)
 
 
 # new_model = t.load("saved_models/test_model.pt", weights_only=False)
