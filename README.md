@@ -30,6 +30,17 @@ Disclaimer: This project is WIP, I am currently just in the process of reimpleme
 * Now I have validation accuracy $1$! There is a small delay in the validation loss dropping to $0$ after the training loss has dropped to $0$.This is grokking, but not as pronounced as in the Nanda paper.
 ![alt text](screenshots/train_loss_after_fixes.png)
 ![alt text](screenshots/val_loss_after_fixes.png)
-* Hm, Nanda et al took $30$% of the data, not $80$, so grokking was more difficult than here with $80$. I didn't run these ecperiments for long, but I could see the grokking for some of the trajectories and the validation accuracy not dropping for others. 
-![alt text](screenshots/p113,training_ratio0.3.png)
-* From an LLC research point of view, it would be best to find parameters where grokking is clearly separated from memorization, but it doesn't take too long to grok. Although, using the setup from the Pizza and the Clock paper, we are at least sure we have pizza and clock exmaples.
+* I got a little hang up on getting nice grokking models, but that is a tangent now.
+    * Nanda used $30$% of the data, not $80%$, so learning the real rule was more difficult than here. I run some short experiments with 30% training data. I could see the grokking for some of the trajectories and the validation accuracy not dropping for others. 
+    ![alt text](screenshots/p113,training_ratio0.3.png)
+    * From an LLC research point of view, it would be best to find parameters where grokking is clearly separated from memorization, but it doesn't take too long to grok.
+    * Got some runs with different parameters. In some cases, the validation loss looks like this. Maybe it learns multiple different algorithms as time passes? (Might worth getting back tot hese runs once I have finished the pizza/clock experiments. This is not a one-off thing, it happened multiple times. Probably this is what happens with some of the runs on the previous plot.)
+    ![alt text](screenshots/01_26_multiples.png)
+
+    [Link](https://wandb.ai/gahanna999-/modular-addition-attention-grokking-sweep?nw=nwusergahanna999) to all experiments. I singled out a few where the grokking is nicely separated:
+        ```
+        p, tf, wd = (113, 0.5, 1.5)
+        p, tf, wd = (59, 0.5, 2.0)
+        p, tf, wd = (59, 0.5, 1.0)
+        ```
+
