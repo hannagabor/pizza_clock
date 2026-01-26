@@ -54,7 +54,7 @@ class Model(nn.Module):
         )
 
     def forward(
-        self, x: Int[Tensor, "batch position token"]
+        self, x: Int[Tensor, "batch position"]
     ) -> Float[Tensor, "batch position vocab"]:
         token_embeddings = self.token_embedding(x)
         position_embeddings = self.position_embedding(
