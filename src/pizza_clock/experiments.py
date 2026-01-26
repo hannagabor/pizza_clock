@@ -22,7 +22,7 @@ def train_model(
     )
 
     trainer = ModularAdditionModelTrainer(config)
-    model = trainer.train(epochs=3000, log_every_n_steps=10)
+    model = trainer.train(epochs=1000, log_every_n_steps=10)
 
     t.save(
         model,
