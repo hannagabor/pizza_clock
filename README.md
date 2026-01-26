@@ -43,4 +43,5 @@ Disclaimer: This project is WIP, I am currently just in the process of reimpleme
         p, tf, wd = (59, 0.5, 2.0)
         p, tf, wd = (59, 0.5, 1.0)
         ```
+* Implemented gradient symmetry. For constant attention, it is always `0.99`. For normal attention (`attention_rate = 1`), it varies between `0.41` and `0.75`. 
 
