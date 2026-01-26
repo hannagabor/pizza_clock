@@ -71,9 +71,18 @@ class Model(nn.Module):
 class Embedding(nn.Module):
     def __init__(self, vocab_size: int, embedding_dim: int, device: t.device):
         super().__init__()
+        self.gradients = []
         self.weight = nn.Parameter(
             t.randn(vocab_size, embedding_dim, device=device) / (embedding_dim**0.5)
         )
+        self.weight.register_hook(lambda grad: self.save_gradients(grad))
+
+    def save_gradients(self, grad) -> None:
+        self.gradients.append(grad)
+
+    def zero_grad(self, set_to_none=True) -> None:
+        self.gradients = []
+        return super().zero_grad(set_to_none)
 
     def forward(
         self, x: Int[Tensor, "batch position"]

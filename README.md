@@ -37,7 +37,7 @@ Disclaimer: This project is WIP, I am currently just in the process of reimpleme
     * Got some runs with different parameters. In some cases, the validation loss looks like this. Maybe it learns multiple different algorithms as time passes? (Might worth getting back tot hese runs once I have finished the pizza/clock experiments. This is not a one-off thing, it happened multiple times. Probably this is what happens with some of the runs on the previous plot.)
     ![alt text](screenshots/01_26_multiples.png)
 
-    [Link](https://wandb.ai/gahanna999-/modular-addition-attention-grokking-sweep?nw=nwusergahanna999) to all experiments. I singled out a few where the grokking is nicely separated:
+    [Link](https://wandb.ai/gahanna999-/modular-addition-attention-grokking-sweep?nw=nwusergahanna999) to all experiments (the link is private, sorry). I singled out a [few](https://wandb.ai/gahanna999-/grokking-with-attention-rate?nw=nwusergahanna999) where the grokking is nicely separated:
         ```
         p, tf, wd = (113, 0.5, 1.5)
         p, tf, wd = (59, 0.5, 2.0)

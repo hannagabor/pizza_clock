@@ -31,21 +31,28 @@ def train_model(
 
 
 if __name__ == "__main__":
-    args = []
-    p_tf_wds = [(113, 0.5, 1.5), (59, 0.5, 2.0), (59, 0.5, 1.0)]
-    for i in range(5):
-        for attention_rate in [0.0, 1.0]:
-            # for p in [113, 59]:
-            #     for train_fraction in [0.3, 0.5, 0.8]:
-            #         for weight_decay in [1.0, 1.5, 2.0]:
-            #             args.append(
-            #                 (i, attention_rate, p, train_fraction, weight_decay)
-            #             )
-            for p, train_fraction, weight_decay in p_tf_wds:
-                args.append((i, attention_rate, p, train_fraction, weight_decay))
-
-    with Pool(5) as p:
-        p.starmap(train_model, args)
+    # args = []
+    # p_tf_wds = [(113, 0.5, 1.5), (59, 0.5, 2.0), (59, 0.5, 1.0)]
+    # for i in range(5):
+    #     for attention_rate in [0.0, 1.0]:
+    #         # for p in [113, 59]:
+    #         #     for train_fraction in [0.3, 0.5, 0.8]:
+    #         #         for weight_decay in [1.0, 1.5, 2.0]:
+    #         #             args.append(
+    #         #                 (i, attention_rate, p, train_fraction, weight_decay)
+    #         #             )
+    #         for p, train_fraction, weight_decay in p_tf_wds:
+    #             args.append((i, attention_rate, p, train_fraction, weight_decay))
+    p = 59
+    train_fraction = 0.8
+    weight_decay = 2.0
+    # args = []
+    # for i in range(5):
+    #     for attention_rate in [0.0, 1.0]:
+    #         args.append((i, attention_rate, p, train_fraction, weight_decay))
+    # with Pool(5) as p:
+    #     p.starmap(train_model, args)
+    train_model(0, 1.0, p, train_fraction, weight_decay)
 
 
 # new_model = t.load("saved_models/test_model.pt", weights_only=False)
