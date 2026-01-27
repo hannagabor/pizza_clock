@@ -6,6 +6,11 @@ from jaxtyping import Float
 from tqdm import tqdm
 import wandb
 from pizza_clock.config import Config
+from copy import deepcopy
+from os import makedirs
+import pandas as pd
+import json
+from pathlib import Path
 
 
 class ModularAdditionModelTrainer:
@@ -27,6 +32,13 @@ class ModularAdditionModelTrainer:
         self.loss_fn = nn.CrossEntropyLoss()
         self.step = 0
         self.config = config
+        self.loss_data = []
+        self.all_models = []
+        self.save_model_dir = f"saved_models/{self.config.wandb_name}"
+        if Path(self.save_model_dir).exists():
+            raise ValueError(
+                f"Model directory {self.save_model_dir} already exists. Please choose a different wandb_name to avoid overwriting."
+            )
 
     def training_step(
         self, x: Float[Tensor, "batch seq_len"], y: Float[Tensor, "batch 1"]
@@ -45,7 +57,12 @@ class ModularAdditionModelTrainer:
             wandb.log({"train loss": loss.item()}, step=self.step)
         return loss.item()
 
-    def train(self, epochs: int = 20000, log_every_n_steps: int = 100) -> Model:
+    def train(
+        self,
+        epochs: int = 20000,
+        log_every_n_steps: int = 100,
+        save_checkpoints: int = 100,
+    ) -> Model:
         if self.config.use_wandb:
             wandb.init(
                 project=self.config.wandb_project_name, name=self.config.wandb_name
@@ -59,13 +76,25 @@ class ModularAdditionModelTrainer:
                 train_loss = self.training_step(x, y)
                 if epoch % log_every_n_steps == 0:
                     val_loss, val_accuracy = self.evaluate()
+                    self.loss_data.append(
+                        {
+                            "step": self.step,
+                            "train_loss": train_loss,
+                            "val_loss": val_loss,
+                            "val_accuracy": val_accuracy,
+                        }
+                    )
                     pbar.set_postfix(
                         loss=f"{train_loss:.3f}, val_loss={val_loss:.3f}, val_acc={val_accuracy:.3f}",
                     )
+                if save_checkpoints > 0 and epoch % save_checkpoints == 0:
+                    self.all_models.append(deepcopy(self.model))
                 self.step += 1
 
         if self.config.use_wandb:
             wandb.finish()
+
+        self.save_models()
 
         return self.model
 
@@ -85,3 +114,22 @@ class ModularAdditionModelTrainer:
                         step=self.step,
                     )
         return loss.item(), accuracy
+
+    def save_models(self):
+        makedirs(self.save_model_dir, exist_ok=True)
+        for i, model in enumerate(self.all_models):
+            t.save(
+                model,
+                f"{self.save_model_dir}/model_{i}.pt",
+            )
+        t.save(
+            self.model,
+            f"{self.save_model_dir}/final_model.pt",
+        )
+        pd.DataFrame(self.loss_data).to_csv(
+            f"{self.save_model_dir}/loss_data.csv", index=False
+        )
+        json.dump(
+            self.config.__dict__,
+            open(f"{self.save_model_dir}/config.json", "w"),
+        )
