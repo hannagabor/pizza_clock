@@ -22,7 +22,9 @@ class AdditionDataset(Dataset):
         return x, y
 
 
-def get_train_val_data(config: Config) -> tuple[DataLoader, DataLoader]:
+def get_train_val_data(
+    config: Config, squeeze_targets: bool = False
+) -> tuple[DataLoader, DataLoader]:
     dataset = AdditionDataset(config.p)
     generator = t.Generator().manual_seed(config.seed)
     train_fraction = config.train_fraction
@@ -30,6 +32,11 @@ def get_train_val_data(config: Config) -> tuple[DataLoader, DataLoader]:
     train_dataset, val_dataset = random_split(
         dataset, [train_fraction, val_fraction], generator=generator
     )
+
+    if squeeze_targets:
+        train_dataset = [(x, y.squeeze()) for x, y in train_dataset]
+        val_dataset = [(x, y.squeeze()) for x, y in val_dataset]
+
     train_dataloader = DataLoader(
         train_dataset, batch_size=len(train_dataset), shuffle=True
     )
