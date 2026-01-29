@@ -1,7 +1,5 @@
 # LLC analysis of grokking on modular arithmetic
 
-Disclaimer: This project is WIP, I am currently just in the process of reimplementing the Pizza and the Clock paper.
-
 ## Goals of the project
 
 * Practice coding something in PyTorch from scratch
@@ -45,3 +43,4 @@ Disclaimer: This project is WIP, I am currently just in the process of reimpleme
         ```
 * Implemented gradient symmetry. For constant attention, it is always `0.99`. For normal attention (`attention_rate = 1`), it varies between `0.41` and `0.75`.
 * I ran a sweep for LLC in `exploration.ipynb`. I will need to learn a bit more about how LLC estimation works.
+* Based on the experiments, attention 1 consistently has lower LLC estinate than attention 0. 
