@@ -43,4 +43,4 @@
         ```
 * Implemented gradient symmetry. For constant attention, it is always `0.99`. For normal attention (`attention_rate = 1`), it varies between `0.41` and `0.75`.
 * I ran a sweep for LLC in `exploration.ipynb`. I will need to learn a bit more about how LLC estimation works.
-* Based on the experiments, attention `1` consistently has lower LLC estinate than attention `0`. I needed to use high localization (`100`) to get converging chains. I need to understand if that is ok.
+* Based on the experiments, attention `1` consistently has lower LLC estinate than attention `0`. (Together with gradient symmetry this suggests that Clock has lower LLC than Pizza.) I needed to use high localization (`100`) to get converging chains. I need to understand if that is ok. I also need to have higher confidence in pixxa and clock distinction.
