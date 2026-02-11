@@ -1,5 +1,7 @@
 # LLC analysis of grokking on modular arithmetic
 
+Disclaimer: This is WIP.
+
 ## Goals of the project
 
 * Practice coding something in PyTorch from scratch
@@ -49,4 +51,4 @@
     * The shape of the curves are very similar for attention `0` and `1`. Estimated LLC is higher for attention `0` (matching previous experiments)
     * They go down long after the test loss is `0`, which is surprising. Possible next question: can I confirm that this is some kind of pruning? E.g. see that some Fourier frequencies are being pruned away?
     * I logged train/test loss after every `10` steps and saved model state only every `100` steps. This means the LLC is estimated only after `100` steps and that is quite late. (The train has already fallen to `0`.) I will rerun these with frequent LLC estimates.
-    
+    * Does gradient symmetry move as the LLC estimate moves?
