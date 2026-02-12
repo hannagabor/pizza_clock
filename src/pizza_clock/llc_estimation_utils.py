@@ -128,6 +128,8 @@ def estimate_and_plot_llc_for_final_model(
     trace = learning_coeff_stats["loss/trace"]
     avg_llc = sum(learning_coeff_stats["llc/means"]) / len(learning_coeff_stats["llc/means"])
     print(dir_path)
+
+    plt.show = plt.savefig(config.save_model_dir / "llc_trace.png")
     plot_trace(
         trace,
         "Loss",
