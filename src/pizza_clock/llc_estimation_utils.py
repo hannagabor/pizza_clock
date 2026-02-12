@@ -25,7 +25,7 @@ from pizza_clock.config import Config, get_device
 from pizza_clock.dataset import AdditionDataset, get_train_val_data
 from pizza_clock.metrics import compute_gradient_symmetry
 from pizza_clock.training import ModularAdditionModelTrainer
-from pizza_clock.metrics import compute_gradient_symmetry
+from pizza_clock.metrics import compute_gradient_symmetry, compute_distance_irrelevance
 
 
 def evaluate_last_position(criterion, model, data):
@@ -181,6 +181,7 @@ def estimate_and_plot_llc_for_all_models(
     ]
 
     gradient_similarities = [compute_gradient_symmetry(model) for model in all_models]
+    distance_irrelevance = [compute_distance_irrelevance(model) for model in all_models]
 
     fig, ax1 = plt.subplots()
     plt.title(
@@ -194,15 +195,15 @@ def estimate_and_plot_llc_for_all_models(
     )
     ax1.plot(df["val_loss"], label="test loss")
     ax1.plot(df["train_loss"], label="train loss")
-
-    x_grad_sim = np.linspace(0, len(df["train_loss"]) - 1, len(gradient_similarities))
-    ax1.plot(
-        x_grad_sim, gradient_similarities, color="purple", label="Gradient Similarity"
-    )
+    ax1.plot(gradient_similarities, label="Gradient Similarity")
+    ax1.plot(distance_irrelevance, label="Distance Irrelevance")
 
     avg_llc = [sum(llc["llc/means"]) / len(llc["llc/means"]) for llc in llcs]
-    x_llc = np.linspace(0, len(df["train_loss"]) - 1, len(avg_llc))
-    ax2.plot(x_llc, avg_llc, color="g", label="Lambdahat")
-    ax1.set_xlabel("Checkpoint no.")
+    ax2.plot(avg_llc, color="g", label="Lambdahat")
+
+    ax1.set_xlabel(f"Checkpoint no. (Every {config.log_every_n_steps} epochs)")
+    ax1.set_ylabel("Loss / Gradient Similarity")
+    ax2.set_ylabel("Lambdahat", color="g")
+    ax2.tick_params(axis="y", labelcolor="g")
     fig.legend(loc="center right")
     plt.savefig(Path(dir_path) / "plot.png")
