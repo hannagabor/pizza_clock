@@ -29,6 +29,9 @@ def compute_gradient_symmetry(model: Model) -> float:
 
 def compute_distance_irrelevance(model: Model) -> float:
     logit_matrix = get_logit_matrix(model)
+    avg_std_per_row = logit_matrix.std(dim=1).mean().item()
+    overall_std = logit_matrix.std().item()
+    return avg_std_per_row / overall_std
 
 
 def get_logit_matrix(model: Model) -> Float[Tensor, "p p"]:
