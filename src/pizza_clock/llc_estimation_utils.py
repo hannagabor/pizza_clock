@@ -154,7 +154,12 @@ def estimate_and_plot_llc_for_final_model(
 
 
 def estimate_and_plot_llc_for_all_models(
-    dir_path, lr=1e-5, nbeta=10.0, localization=10.0, num_chains=3, num_draws=1500
+    dir_path: str,
+    lr: float = 1e-5,
+    nbeta: float = 10.0,
+    localization: float = 10.0,
+    num_chains: int = 3,
+    num_draws: int = 1500,
 ):
     _, config, all_models = load_model_and_config(dir_path)
     train_loader, _ = get_train_val_data(config, squeeze_targets=True)
@@ -200,3 +205,4 @@ def estimate_and_plot_llc_for_all_models(
     ax2.plot(x_llc, avg_llc, color="g", label="Lambdahat")
     ax1.set_xlabel("Checkpoint no.")
     fig.legend(loc="center right")
+    plt.savefig(Path(dir_path) / "plot.png")

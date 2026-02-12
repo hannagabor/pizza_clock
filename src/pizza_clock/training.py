@@ -11,6 +11,7 @@ from os import makedirs
 import pandas as pd
 import json
 from pathlib import Path
+from warnings import warn
 
 
 class ModularAdditionModelTrainer:
@@ -34,13 +35,14 @@ class ModularAdditionModelTrainer:
         self.config = config
         self.loss_data = []
         self.all_models = []
-        self.save_model_dir = (
-            f"saved_models/{self.config.model_name}" if self.config.model_name else None
-        )
-        if self.save_model_dir is not None and Path(self.save_model_dir).exists():
-            raise ValueError(
-                f"Model directory {self.save_model_dir} already exists. Please choose a different model_name to avoid overwriting."
-            )
+        if self.config.model_name is None:
+            warn("Model name is not set. Checkpoints will not be saved.")
+        else:
+            self.save_model_dir = f"saved_models/{self.config.model_name}"
+            if Path(self.save_model_dir).exists():
+                raise ValueError(
+                    f"Model directory {self.save_model_dir} already exists. Please choose a different model_name to avoid overwriting."
+                )
 
     def training_step(
         self, x: Float[Tensor, "batch seq_len"], y: Float[Tensor, "batch 1"]
@@ -63,7 +65,6 @@ class ModularAdditionModelTrainer:
         self,
         epochs: int = 20000,
         log_every_n_steps: int = 100,
-        save_checkpoints: int = 100,
     ) -> Model:
         if self.config.use_wandb:
             wandb.init(
@@ -89,7 +90,6 @@ class ModularAdditionModelTrainer:
                     pbar.set_postfix(
                         loss=f"{train_loss:.3f}, val_loss={val_loss:.3f}, val_acc={val_accuracy:.3f}",
                     )
-                if save_checkpoints > 0 and epoch % save_checkpoints == 0:
                     self.all_models.append(deepcopy(self.model))
                 self.step += 1
 

@@ -5,9 +5,10 @@ from torch.multiprocessing import Pool
 from datetime import date
 
 
-def train_model(config: Config, epochs: int = 20000):
+def train_model(config: Config, epochs: int = 20000) -> t.nn.Module:
     trainer = ModularAdditionModelTrainer(config)
     model = trainer.train(epochs=epochs, log_every_n_steps=10, save_checkpoints=10)
+    return model
 
 
 paper_config = Config(device=get_device())
