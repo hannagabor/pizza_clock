@@ -1,31 +1,25 @@
 import json
 import os
 import typing
-from collections import defaultdict, namedtuple
 from functools import partial
 from pathlib import Path
 from typing import Type
 import matplotlib.pyplot as plt
 
-import einops
 import numpy as np
 import pandas as pd
 import torch as t
 from devinterp.optim.sgld import SGLD
 from devinterp.slt.sampler import estimate_learning_coeff_with_summary
-from devinterp.utils import evaluate_ce, plot_trace
+from devinterp.utils import plot_trace
 from devinterp.vis_utils import EpsilonBetaAnalyzer
-from jaxtyping import Float
-from torch import Tensor, nn
 from torch.nn import functional as F
-from torch.utils.data import DataLoader, random_split
 
-import wandb
+
 from pizza_clock.config import Config, get_device
-from pizza_clock.dataset import AdditionDataset, get_train_val_data
+from pizza_clock.dataset import get_train_val_data
 from pizza_clock.metrics import compute_gradient_symmetry
-from pizza_clock.training import ModularAdditionModelTrainer
-from pizza_clock.metrics import compute_gradient_symmetry, compute_distance_irrelevance
+from pizza_clock.metrics import compute_distance_irrelevance
 
 
 def evaluate_last_position(criterion, model, data):
@@ -79,13 +73,9 @@ def load_model_and_config(
 ) -> tuple[t.nn.Module, Config, list[t.nn.Module]]:
     config_json = json.load(open(f"{dir_path}/config.json", "r"))
     config = Config(**config_json)
-    final_model = t.load(
-        f"{dir_path}/final_model.pt", map_location=get_device(), weights_only=False
-    )
+    final_model = t.load(f"{dir_path}/final_model.pt", map_location=get_device(), weights_only=False)
     all_models = [
-        t.load(
-            f"{dir_path}/model_{i}.pt", map_location=get_device(), weights_only=False
-        )
+        t.load(f"{dir_path}/model_{i}.pt", map_location=get_device(), weights_only=False)
         for i in range(len(list(Path(dir_path).glob("model_*.pt"))))
     ]
     return final_model, config, all_models
@@ -136,9 +126,7 @@ def estimate_and_plot_llc_for_final_model(
         online=True,
     )
     trace = learning_coeff_stats["loss/trace"]
-    avg_llc = sum(learning_coeff_stats["llc/means"]) / len(
-        learning_coeff_stats["llc/means"]
-    )
+    avg_llc = sum(learning_coeff_stats["llc/means"]) / len(learning_coeff_stats["llc/means"])
     print(dir_path)
     plot_trace(
         trace,
