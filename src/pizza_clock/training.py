@@ -34,10 +34,12 @@ class ModularAdditionModelTrainer:
         self.config = config
         self.loss_data = []
         self.all_models = []
-        self.save_model_dir = f"saved_models/{self.config.wandb_name}"
-        if Path(self.save_model_dir).exists():
+        self.save_model_dir = (
+            f"saved_models/{self.config.model_name}" if self.config.model_name else None
+        )
+        if self.save_model_dir is not None and Path(self.save_model_dir).exists():
             raise ValueError(
-                f"Model directory {self.save_model_dir} already exists. Please choose a different wandb_name to avoid overwriting."
+                f"Model directory {self.save_model_dir} already exists. Please choose a different model_name to avoid overwriting."
             )
 
     def training_step(
@@ -65,7 +67,7 @@ class ModularAdditionModelTrainer:
     ) -> Model:
         if self.config.use_wandb:
             wandb.init(
-                project=self.config.wandb_project_name, name=self.config.wandb_name
+                project=self.config.wandb_project_name, name=self.config.model_name
             )
             self.wandb_run_id = wandb.run.id
             wandb.watch(self.model)
@@ -94,7 +96,8 @@ class ModularAdditionModelTrainer:
         if self.config.use_wandb:
             wandb.finish()
 
-        self.save_models()
+        if self.config.model_name is not None:
+            self.save_models()
 
         return self.model
 

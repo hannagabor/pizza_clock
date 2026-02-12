@@ -22,7 +22,7 @@ if __name__ == "__main__":
                     Config(
                         attention_rate=attention_rate,
                         wandb_project_name="modular-addition-5",
-                        wandb_name=name,
+                        model_name=name,
                         use_wandb=True,
                         device=get_device(),
                         seed=seed,

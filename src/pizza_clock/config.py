@@ -11,7 +11,7 @@ class Config:
     weight_decay: float = 2.0
     train_fraction: float = 0.8
     wandb_project_name: str = "modular-addition"
-    wandb_name: str | None = None
+    model_name: str | None = None
     use_wandb: bool = True
     device: str = "cpu"
     seed: int | None = 42
