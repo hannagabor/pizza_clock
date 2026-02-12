@@ -50,5 +50,8 @@ if __name__ == "__main__":
 
     with Pool(5) as p:
         p.starmap(train_model, training_args)
+
+    # LLC estimation is more memory intensive, so we use less processes to avoid swapping.
+    with Pool(2) as p:
         # p.starmap(estimate_and_plot_llc_for_final_model, llc_args)
         p.starmap(estimate_and_plot_llc_for_all_models, llc_args)
