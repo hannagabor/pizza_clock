@@ -11,7 +11,7 @@ from datetime import date
 
 def train_model(config: Config, epochs: int = 20000) -> t.nn.Module:
     trainer = ModularAdditionModelTrainer(config)
-    model = trainer.train(epochs=epochs, log_every_n_steps=10, save_checkpoints=10)
+    model = trainer.train(epochs=epochs, log_every_n_steps=10)
     return model
 
 
