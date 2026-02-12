@@ -5,6 +5,7 @@ from functools import partial
 from pathlib import Path
 from typing import Type
 import matplotlib.pyplot as plt
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
@@ -20,6 +21,17 @@ from pizza_clock.config import Config, get_device
 from pizza_clock.dataset import get_train_val_data
 from pizza_clock.metrics import compute_gradient_symmetry
 from pizza_clock.metrics import compute_distance_irrelevance
+
+
+@dataclass
+class LLCEstimationConfig:
+    dir_path: str = None
+    log_every_n_steps: int = 10
+    lr: float = 1e-5
+    nbeta: float = 10.0
+    localization: float = 10.0
+    num_chains: int = 3
+    num_draws: int = 1500
 
 
 def evaluate_last_position(criterion, model, data):
@@ -109,9 +121,9 @@ def sweep(dir_path: str, min_epsilon=3e-7, max_epsilon=3e-4):
 
 
 def estimate_and_plot_llc_for_final_model(
-    dir_path, lr=1e-5, nbeta=10.0, localization=10.0, num_chains=3, num_draws=1500
+    llcestimation_config: LLCEstimationConfig,
 ):
-    final_model, config, all_models = load_model_and_config(dir_path)
+    final_model, config, all_models = load_model_and_config(llcestimation_config.dir_path)
     train_loader, _ = get_train_val_data(config, squeeze_targets=True)
 
     learning_coeff_stats = estimate_learning_coeff_with_summary(
@@ -119,17 +131,17 @@ def estimate_and_plot_llc_for_final_model(
         loader=train_loader,
         evaluate=evaluate_last_position_ce,
         sampling_method=SGLD,
-        optimizer_kwargs=dict(lr=lr, nbeta=nbeta, localization=localization),
-        num_chains=num_chains,
-        num_draws=num_draws,
+        optimizer_kwargs=dict(
+            lr=llcestimation_config.lr, nbeta=llcestimation_config.nbeta, localization=llcestimation_config.localization
+        ),
+        num_chains=llcestimation_config.num_chains,
+        num_draws=llcestimation_config.num_draws,
         device=get_device(),
         online=True,
     )
     trace = learning_coeff_stats["loss/trace"]
     avg_llc = sum(learning_coeff_stats["llc/means"]) / len(learning_coeff_stats["llc/means"])
-    print(dir_path)
 
-    plt.show = plt.savefig(config.save_model_dir / "llc_trace.png")
     plot_trace(
         trace,
         "Loss",
@@ -143,17 +155,10 @@ def estimate_and_plot_llc_for_final_model(
     return avg_llc
 
 
-def estimate_and_plot_llc_for_all_models(
-    dir_path: str,
-    lr: float = 1e-5,
-    nbeta: float = 10.0,
-    localization: float = 10.0,
-    num_chains: int = 3,
-    num_draws: int = 1500,
-):
-    _, config, all_models = load_model_and_config(dir_path)
+def estimate_and_plot_llc_for_all_models(llc_estimation_config: LLCEstimationConfig):
+    _, config, all_models = load_model_and_config(llc_estimation_config.dir_path)
     train_loader, _ = get_train_val_data(config, squeeze_targets=True)
-    df = pd.read_csv(os.path.join(dir_path, "loss_data.csv"))
+    df = pd.read_csv(os.path.join(llc_estimation_config.dir_path, "loss_data.csv"))
 
     llcs = [
         estimate_learning_coeff_with_summary(
@@ -161,9 +166,13 @@ def estimate_and_plot_llc_for_all_models(
             loader=train_loader,
             evaluate=evaluate_last_position_ce,
             sampling_method=SGLD,
-            optimizer_kwargs=dict(lr=lr, nbeta=nbeta, localization=localization),
-            num_chains=num_chains,
-            num_draws=num_draws,
+            optimizer_kwargs=dict(
+                lr=llc_estimation_config.lr,
+                nbeta=llc_estimation_config.nbeta,
+                localization=llc_estimation_config.localization,
+            ),
+            num_chains=llc_estimation_config.num_chains,
+            num_draws=llc_estimation_config.num_draws,
             device=get_device(),
             online=True,
         )
@@ -175,7 +184,7 @@ def estimate_and_plot_llc_for_all_models(
 
     fig, ax1 = plt.subplots()
     plt.title(
-        f"Lambdahat vs loss for modular addition, p={config.p}, attr_rate={config.attention_rate}, train_frac={config.train_fraction}, nβ={nbeta:.1f}, ε={lr}, num_draws={num_draws}, num_chains={num_chains}"
+        f"p={config.p}, attr_rate={config.attention_rate}, nβ={llc_estimation_config.nbeta:.1f}, ε={llc_estimation_config.lr}, num_draws={llc_estimation_config.num_draws}, num_chains={llc_estimation_config.num_chains}"
     )
     ax2 = ax1.twinx()
     print(
@@ -185,8 +194,8 @@ def estimate_and_plot_llc_for_all_models(
     )
     ax1.plot(df["val_loss"], label="test loss")
     ax1.plot(df["train_loss"], label="train loss")
-    ax1.plot(gradient_similarities, label="Gradient Similarity")
-    ax1.plot(distance_irrelevance, label="Distance Irrelevance")
+    ax1.plot(gradient_similarities, color="purple", label="Gradient Similarity")
+    ax1.plot(distance_irrelevance, color="yellowgreen", label="Distance Irrelevance")
 
     avg_llc = [sum(llc["llc/means"]) / len(llc["llc/means"]) for llc in llcs]
     ax2.plot(avg_llc, color="g", label="Lambdahat")
@@ -195,16 +204,18 @@ def estimate_and_plot_llc_for_all_models(
         {
             "train_loss": df["train_loss"].tolist(),
             "val_loss": df["val_loss"].tolist(),
-            "gradient_similarity": gradient_similarities,
-            "distance_irrelevance": distance_irrelevance,
-            "lambdahat": avg_llc,
+            "gradient_similarity": [float(x) for x in gradient_similarities],
+            "distance_irrelevance": [float(x) for x in distance_irrelevance],
+            "lambdahat": [float(x) for x in avg_llc],
         },
-        open(Path(dir_path) / "metrics.json", "w"),
+        open(Path(llc_estimation_config.dir_path) / "metrics.json", "w"),
     )
 
-    ax1.set_xlabel(f"Checkpoint no. (Every {config.log_every_n_steps} epochs)")
+    ax1.set_xlabel(f"Checkpoint no. (Every {llc_estimation_config.log_every_n_steps} epochs)")
     ax1.set_ylabel("Loss / Gradient Similarity")
     ax2.set_ylabel("Lambdahat", color="g")
     ax2.tick_params(axis="y", labelcolor="g")
-    fig.legend(loc="center right")
-    plt.savefig(Path(dir_path) / "plot.png")
+    fig.legend(loc="upper center", bbox_to_anchor=(0.5, -0.02), ncol=3)
+    plt.tight_layout()
+    plot_path = Path(llc_estimation_config.dir_path) / "plot.png"
+    plt.savefig(plot_path, bbox_inches="tight")
