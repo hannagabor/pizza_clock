@@ -189,6 +189,17 @@ def estimate_and_plot_llc_for_all_models(
     avg_llc = [sum(llc["llc/means"]) / len(llc["llc/means"]) for llc in llcs]
     ax2.plot(avg_llc, color="g", label="Lambdahat")
 
+    json.dump(
+        {
+            "train_loss": df["train_loss"].tolist(),
+            "val_loss": df["val_loss"].tolist(),
+            "gradient_similarity": gradient_similarities,
+            "distance_irrelevance": distance_irrelevance,
+            "lambdahat": avg_llc,
+        },
+        open(Path(dir_path) / "metrics.json", "w"),
+    )
+
     ax1.set_xlabel(f"Checkpoint no. (Every {config.log_every_n_steps} epochs)")
     ax1.set_ylabel("Loss / Gradient Similarity")
     ax2.set_ylabel("Lambdahat", color="g")
