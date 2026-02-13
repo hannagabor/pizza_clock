@@ -2,6 +2,7 @@ from pizza_clock.models import Model
 import torch as t
 from torch import Tensor
 from jaxtyping import Float
+from statistics import mean
 
 
 def compute_gradient_symmetry(model: Model) -> float:
@@ -29,9 +30,18 @@ def compute_gradient_symmetry(model: Model) -> float:
 
 def compute_distance_irrelevance(model: Model) -> float:
     logit_matrix = get_logit_matrix(model)
-    avg_std_per_row = logit_matrix.std(dim=1).mean().item()
+    p = model.config.p
+    avg_std_per_diff = mean([get_logits_with_diff(logit_matrix, d).std().item() for d in range(p)])
     overall_std = logit_matrix.std().item()
-    return avg_std_per_row / overall_std
+    return avg_std_per_diff / overall_std
+
+
+def get_logits_with_diff(matrix: Float[Tensor, "p p"], diff: int) -> Float[Tensor, " p"]:
+    p = matrix.shape[0]
+    row_indices = range(p)
+    col_indices = [(i + diff) % p for i in range(p)]
+
+    return matrix[row_indices, col_indices]
 
 
 def get_logit_matrix(model: Model) -> Float[Tensor, "p p"]:
